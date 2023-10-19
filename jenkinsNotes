@@ -30,7 +30,43 @@ export PATH=$JAVA_HOME/bin:$PATH
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 
 -------
+below documents can be followed from AWS to install JAVA 11 in EC2 instance.
 
+https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/amazon-linux-install.html
+
+sudo yum install java-11-amazon-corretto-devel
+
+[root@ip-172-31-37-159 ~]# sudo yum install java-11-amazon-corretto-devel
+[root@ip-172-31-37-159 ~]# java --version
+openjdk 11.0.20.1 2023-08-22 LTS
+OpenJDK Runtime Environment Corretto-11.0.20.9.1 (build 11.0.20.1+9-LTS)
+OpenJDK 64-Bit Server VM Corretto-11.0.20.9.1 (build 11.0.20.1+9-LTS, mixed mode)
+[root@ip-172-31-37-159 ~]# systemctl start jenkins
+[root@ip-172-31-37-159 ~]# systemctl status jenkins
+● jenkins.service - Jenkins Continuous Integration Server
+     Loaded: loaded (/usr/lib/systemd/system/jenkins.service; disabled; preset:>
+     Active: active (running) since Thu 2023-10-19 16:20:16 UTC; 10s ago
+   Main PID: 43283 (java)
+      Tasks: 43 (limit: 1114)
+     Memory: 375.1M
+        CPU: 42.942s
+     CGroup: /system.slice/jenkins.service
+             └─43283 /usr/bin/java -Djava.awt.headless=true -jar /usr/share/jav>
+
+Oct 19 16:19:43 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: b2b>
+Oct 19 16:19:43 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: Thi>
+Oct 19 16:19:43 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: ***>
+Oct 19 16:19:43 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: ***>
+Oct 19 16:19:43 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: ***>
+Oct 19 16:20:16 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: 202>
+Oct 19 16:20:16 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: 202>
+Oct 19 16:20:16 ip-172-31-37-159.us-east-2.compute.internal systemd[1]: Started>
+Oct 19 16:20:16 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: 202>
+Oct 19 16:20:16 ip-172-31-37-159.us-east-2.compute.internal jenkins[43283]: 202>
+lines 1-20/20 (END)
+
+----------------------------------------------------------------
+https://stackoverflow.com/questions/10268583/downloading-java-jdk-on-linux-via-wget-is-shown-license-page-instead
 
 On the browser open https://www.jenkins.io/
 
@@ -85,6 +121,8 @@ Systemctl restart jenkins
 
 ********************************
 
+* what is the home dir of jenkins
+[root@ip-172-31-37-159 ~]# cd /var/lib/jenkins/
 
 
 We need to now  set up jenkins dashboard
@@ -92,6 +130,10 @@ We need to now  set up jenkins dashboard
 For this, take public ip address of ec2 server, copy it and go to your browser and give
 
 publicipaddress:8080
+3.136.160.21:8080
+[root@ip-172-31-37-159 jenkins]# netstat -tulpn| grep -i 8080
+tcp6       0      0 :::8080                 :::*                    LISTEN      43283/java
+[root@ip-172-31-37-159 jenkins]#
 
 On the ec2 server, execute below command
 
