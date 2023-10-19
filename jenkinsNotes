@@ -20,7 +20,16 @@ JAVA Installation
 SEE THAT YOU ARE IN ROOT DIRECTORY
 
 # sudo amazon-linux-extras install java-openjdk11
+-----
+tar zxvf jdk-11.0.20_linux-x64_bin.tar.gz
 
+sudo vim /etc/profile
+#add
+export JAVA_HOME=/home/ec2-user/jdk-11.0.20
+export PATH=$JAVA_HOME/bin:$PATH
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+
+-------
 
 
 On the browser open https://www.jenkins.io/
