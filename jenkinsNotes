@@ -181,6 +181,13 @@ Give git hub repo path
 https://github.com/Sonal0409/myproject05Aug
 
 Branch name as ===>  Master
+[I spent a long time on this. The above comment "if I leave this field blank" worked like a charm. In SCM:
+1) select Git
+2) Name: origin
+3) Refspec: +refs/pull/*:refs/remotes/origin/pr/*
+4) Branches to build : leave blank
+
+This solved the above error.]
 
 Save the job
 
@@ -204,13 +211,6 @@ You will go to build triggered section in the job to set up a trigger for automa
 
 
 Trigger prieodically
-
-
-
-
-
-
-
 
 
 Go to Job Clone repo --> build trigger--> build preodically --> give */2 * * * * --> Save and build now
