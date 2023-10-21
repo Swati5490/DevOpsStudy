@@ -281,11 +281,42 @@ Agenda Day3:
 ****************
 Maven - features, commands of maven, plugins
 
+Build automation tool,maven is plugin based 
 Plugin Management
 Configure Build tools in jenkins
 Download plugins
 Build pipeline - Upstream & downstream pipeline
+Build plugins will be executed during the build and they should be configured in the <build/> element from the POM.
+2 main plugin
+core build plugin
+Task 			plugin		Command
+compile the code	complier	compile
+test cases		surfier		test
+package			package		package
+clean the previous
+build file		clean		clean
+push your artifact	Deploy		Deploy
 
+Review plugin : which when executed will generate reports - .xml .csv .html or .txt
+or Reporting plugins will be executed during the site generation and they should be configured in the <reporting/> element from the POM. Because the result of a Reporting plugin is part of the generated site, 
+Reporting plugins should be both internationalized and localized.
+code review		pmd 		pmd:pmd
+code coverage		coberatura	coberatura:coberatura()deprecated66
+tools:
+JACOCO
+SONARQUBE		sonar:sonar
+
+Test Report 		SurfireReports	test
+
+MAVEN PROJECT :-
+
+> src/main/java ==>
+> src/test/java ==> test cases
+
+POM.xml
+
+> dependencies ==> information about s/w that are used by developer to write the code
+> Build plugins ==> name and version of vaious plugins in order to perform build steps
 
 
 Jenkins--> Manage Jenkins-->Global Tool configuration
@@ -314,6 +345,98 @@ Under GIT==> leave it same
 Under maven ==> lets install it automatically
 Type mymaven and check the install automatically box.
 Save the changes
+
+GIT 		| ==> Compile	    ==>Code Review	   ==> Test		 ==> Code 	  ==>Package |     ==> Deploy Container
+Source code  	| java classfile		pmd				        Coverage	     | 	
+<java/maven>	| 1st job		2nd job		   3rd Job	         4th Job	  5th Job    |
+
+
+Steps :
+ 1--> Download the build tool plugin --> Maven plugin is already available
+ 2--> Configure Maven Tool in jenkins
+
+Manage Jenkins > Tool Config<before it was global tool config>
+
+Name to the tool
+version
+[Add Maven with auto install and give name to maven] 
+
+2ways to create jenkins pipeline :-
+1 -> upstream and downstream pipeline using freestyle project : leraner who dont know the code/simple job and simple build pipeline
+2 -> POD pipeline : for difficult
+
+login as: ec2-user
+Authenticating with public key "imported-openssh-key"
+   ,     #_
+   ~\_  ####_        Amazon Linux 2023
+  ~~  \_#####\
+  ~~     \###|
+  ~~       \#/ ___   https://aws.amazon.com/linux/amazon-linux-2023
+   ~~       V~' '->
+    ~~~         /
+      ~~._.   _/
+         _/ _/
+       _/m/'
+Last login: Sat Oct 21 03:00:15 2023
+[ec2-user@ip-172-31-37-159 ~]$ sudo su
+[root@ip-172-31-37-159 ec2-user]# cd ~
+[root@ip-172-31-37-159 ~]# cd /var/lib/jenkins
+[root@ip-172-31-37-159 jenkins]# ls
+config.xml
+hudson.model.UpdateCenter.xml
+hudson.plugins.git.GitTool.xml
+hudson.plugins.gradle.Gradle.xml
+hudson.plugins.mercurial.MercurialInstallation.xml
+hudson.tasks.Ant.xml
+hudson.tasks.Maven.xml
+identity.key.enc
+jenkins.install.InstallUtil.lastExecVersion
+jenkins.install.UpgradeWizard.state
+jenkins.model.JenkinsLocationConfiguration.xml
+jenkins.mvn.GlobalMavenConfig.xml
+jenkins.telemetry.Correlator.xml
+jobs
+logs
+nodeMonitors.xml
+nodes
+org.jenkinsci.plugins.gitclient.JGitApacheTool.xml
+org.jenkinsci.plugins.gitclient.JGitTool.xml
+plugins
+queue.xml.bak
+secret.key
+secret.key.not-so-secret
+secrets
+updates
+userContent
+users
+workspace
+[root@ip-172-31-37-159 jenkins]#
+[root@ip-172-31-37-159 jenkins]# cat jenkins.mvn.GlobalMavenConfig.xml
+<?xml version='1.1' encoding='UTF-8'?>
+<jenkins.mvn.GlobalMavenConfig>
+  <settingsProvider class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettingsProvider class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+</jenkins.mvn.GlobalMavenConfig>[root@ip-172-31-37-159 jenkins]#
+[root@ip-172-31-37-159 jenkins]# cat hudson.tasks.Maven.xml
+<?xml version='1.1' encoding='UTF-8'?>
+<hudson.tasks.Maven_-DescriptorImpl>
+  <installations>
+    <hudson.tasks.Maven_-MavenInstallation>
+      <name>MyMaven</name>
+      <properties>
+        <hudson.tools.InstallSourceProperty>
+          <installers>
+            <hudson.tasks.Maven_-MavenInstaller>
+              <id>3.8.6</id>
+            </hudson.tasks.Maven_-MavenInstaller>
+          </installers>
+        </hudson.tools.InstallSourceProperty>
+      </properties>
+    </hudson.tasks.Maven_-MavenInstallation>
+  </installations>
+</hudson.tasks.Maven_-DescriptorImpl>[root@ip-172-31-37-159 jenkins]# mvn --version
+bash: mvn: command not found
+[root@ip-172-31-37-159 jenkins]#
 
 
 ****************************************
