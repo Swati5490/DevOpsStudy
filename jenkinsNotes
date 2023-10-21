@@ -188,6 +188,41 @@ Branch name as ===>  Master
 4) Branches to build : leave blank
 
 This solved the above error.]
+* clone repo either public or private with credential
+first we create ssh key
+[root@ip-172-31-37-159 ~]# cd ~/.ssh
+[root@ip-172-31-37-159 .ssh]# ls
+authorized_keys
+[root@ip-172-31-37-159 .ssh]# ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /root/.ssh/id_rsa
+Your public key has been saved in /root/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:iNxIRYRIgcHIK34jhz4BSNYjdbv6ZXpusTEICoJpo/4 root@ip-172-31-37-159.us-east-2.compute.internal
+The key's randomart image is:
++---[RSA 3072]----+
+|=+=+ =+          |
+|o*.oo..          |
+|=.o o.           |
+|O+ + +..         |
+|O + =.+ S        |
+|.* +.. +         |
+|o =..  o=        |
+| +  . ++         |
+|  oE o+.         |
++----[SHA256]-----+
+[root@ip-172-31-37-159 .ssh]# cat /root/.ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDdTtJ0KwD0sVbpPy8902xUSKcDZJ3goKUHesjAs5fFUxHy//m+HAHUKxsqDG6qMorZFNejPg8xZqA+dkQoQXeYOIjidHgs9rZsZE202BNTJF0HQO1a9X69ezr4txUquy3lUoZsdpiQWghdMBTHGAdGS+VcWDAzARGQ+sLlUaKO5fJZ2vVHbI+D+wYB7d9b/zRCkLb2xw7CdYBbKn5TUwHfC5nCu8Zd/cJtNX4QVeBhJpSH+PbBM17gcXysorHekWPZw9/YIKE84H18X0n8QAH5aZ2q10HI3c2IDuIIK4pUdL2vsjmsV7f1R6fC4ADTeSVqsJovSHINBTGf3cFnsIrupD3hDgU8daAzaoBXubHyE+L+RapSSMeL6T1s+GkEv5nDT8+z3r/9WRrAC3Ljz0BV7S80ON9yxJaBePLcx3cITuD1gvv3ZVZJJjelLLB95l8gd/EW1sH9tZY/V9oE2+4zzrkjDbWco9ZtvTlaqDc1zkv8IH+wd0Vm5JRsX4y6GiU= root@ip-172-31-37-159.us-east-2.compute.internal
+[root@ip-172-31-37-159 .ssh]#
+[root@ip-172-31-37-159 .ssh]#
+
+
+In GitHub Add Deploy key and save in repository
+
+on jenkins create credential (select username with SSH Key and then copy key here)
 
 Save the job
 
@@ -236,14 +271,6 @@ Build will be generated each time there is a chnage in the repository only.
 Webhook:
 Webhooks allow Jenkins to be notified when certain events happen on the repo. When the specified events happen, we’ll send a POST request to each of the URLs you provide.
 
-
-
-
-
-
-
-
-
 GitHub hook trigger for GITScm polling
 
 > Select the above option
@@ -256,7 +283,7 @@ go to the repository setting
 select webhooks on left side
 delete if any exisitng webhook
 
-click on createwebhook on right side
+click on create webhook on right side
 
 provide following information:
 
