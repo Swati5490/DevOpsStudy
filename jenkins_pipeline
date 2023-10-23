@@ -1,0 +1,1449 @@
+# Install Apache HTTP Server
+
+sudo yum -y install httpd
+
+# Start Apache HTTP Server
+
+sudo systemctl start httpd
+
+if [ "$(ls -A /var/www/html)" ]
+then
+   cd /var/www/html
+   sudo git pull
+else
+ # Update App Code
+   sudo git clone https://github.com/Sonal0409/ecomm.git /var/www/html
+fi
+
+
+######################################################################
+
+Username and Password Credentials
+pipeline {
+    agent any
+    stages {
+        stage('Example Username/Password') {
+            environment {
+                SERVICE_CREDS = credentials('my-predefined-username-password')
+            }
+            steps {
+                sh 'echo "Service user is $SERVICE_CREDS_USR"'
+                sh 'echo "Service password is $SERVICE_CREDS_PSW"'
+                sh 'curl -u $SERVICE_CREDS https://myservice.example.com'
+            }
+        }
+        stage('Example SSH Username with private key') {
+            environment {
+                SSH_CREDS = credentials('my-predefined-ssh-creds')
+            }
+            steps {
+                sh 'echo "SSH private key is located at $SSH_CREDS"'
+                sh 'echo "SSH user is $SSH_CREDS_USR"'
+                sh 'echo "SSH passphrase is $SSH_CREDS_PSW"'
+            }
+        }
+    }
+}
+
+################################################################################
+
+Integrating Django with Jenkins
+
+Install Jenkins
+
+Installing Python
+Most of the systems with OS like MacOS or Ubuntu already have python installed. You may need to update python to latest version. To do so follow below steps:
+Mac:
+brew udpate
+brew install python3
+Ubuntu:
+sudo apt-get update
+sudp apt-get install python3
+
+Create a folder MyProject in your workspace
+Create virtual environment in MyProject as:
+virtualenv myenv
+start virtual environment as:
+source myenv/bin/activate
+
+Install Django
+
+pip install Django
+
+create a project DjangoJenkins
+django-admin startproject DjangoJenkins
+create an app MyApp
+django-admin startapp MyApp
+Install jenkins’ plugins:
+pip install django-jenkins
+pip install pep8
+pip install pyflakes
+Added jenkins in settings.py:
+In the file DjangoJenkins->DjangoJenkins->settings.py->INSTALLED_APPS add django_jenkins
+
+in settings.py add below lines:
+PROJECT_APPS = (
+‘MyApp’
+)
+JENKINS_TASKS = (
+‘django_jenkins.tasks.run_pep8’,
+‘django_jenkins.tasks.run_pyflakes’
+)
+
+
+
+Once you have Django and Jenkins up and running, you can start configuring Jenkins for Django now:
+Start Jenkins.
+
+Create new item:
+Give name to the item: DjangoJenkinExample
+Select Freestyle project
+Click Ok
+
+In Source code Management, select Git and give repo and branch name
+
+In Build Triggers, select Poll SCM
+and write
+H/15 * * * *
+in the text field.
+
+In Build, select exucute shell and white below lines:
+#!/bin/bash
+virtualenv -p python3 myenv
+source myenv/bin/activate
+pip3 install -r requirements.txt
+cd reports
+touch *.xml
+touch *.report
+cd ..
+python3 manage.py jenkins — enable-coverage
+
+
+click Build Now
+
+
+Reference document : https://django-jenkins.readthedocs.io/en/latest/
+
+https://rk.edu.pl/en/continuous-integration-django-projects-jenkins/
+
+#############################################################################################
+https://wiki.jenkins.io/display/JENKINS/Jenkins+CLI
+
+https://www.jenkins.io/doc/developer/cli/writing-cli-commands/
+
+https://javadoc.jenkins.io/hudson/cli/CLICommand.html
+################################################################################################
+node
+{
+
+def jobName = currentBuild.fullDisplayName
+def mailToRecipients = 'myemailtestjenkinsjune@gmail.com'
+def useremail='myemailtestjenkinsjune@gmail.com'
+
+stage('Build') 
+{
+    def userAborted = false
+
+ emailext body: '''
+    Please go to console output of ${BUILD_URL}input to approve or Reject.<br>
+ ''',    
+    mimeType: 'text/html',
+    subject: "[Jenkins] ${jobName} Build Approval Request",
+    from: "${useremail}",
+    to: "${mailToRecipients}",
+    recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+
+ echo "Building1"
+ try { 
+    userInput = input submitter: 'vagrant', message: 'Do you approve?'
+ } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+   cause = e.causes.get(0)
+   echo "Aborted by " + cause.getUser().toString()
+   userAborted = true
+    echo "SYSTEM aborted, but looks like timeout period didn't complete. Aborting."
+ }
+    if (userAborted) {
+  currentBuild.result = 'ABORTED'
+ } else {
+  echo "Building2"
+ }
+
+    
+       
+
+}
+stage('Distribution')
+{
+parallel 'Test': 
+ {    
+
+ echo "Testing" 
+
+ },
+'Deploy':
+ {
+
+ echo "Deploying" 
+
+ }
+}
+stage('Finish')
+{
+    echo "Successfully Completed"
+}
+
+}
+#################################################################################
+
+LINUX SLAVE
+*************************
+create root directory
+
+cd /tmp
+mkdir jenkisndir
+
+give permission to the directory
+
+sudo chmod -R 777 /tmp/jenkinsdir
+
+Go to master
+*************
+
+Go to node
+
+give following informtion under Launch Method
+
+how to connetc to master- select ssh
+
+host: private ip
+
+provide credentials
+
+also set 
+Host key verfication as:
+Non verifying Verification startegy
+
+save it
+
+#################################################################
+Parameters, Declarative Pipeline
+pipeline {
+    agent any
+    parameters {
+        string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+
+        text(name: 'BIOGRAPHY', defaultValue: '', description: 'Enter some information about the person')
+
+        booleanParam(name: 'TOGGLE', defaultValue: true, description: 'Toggle this value')
+
+        choice(name: 'CHOICE', choices: ['One', 'Two', 'Three'], description: 'Pick something')
+
+        password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'Enter a password')
+    }
+    stages {
+        stage('Example') {
+            steps {
+                echo "Hello ${params.PERSON}"
+
+                echo "Biography: ${params.BIOGRAPHY}"
+
+                echo "Toggle: ${params.TOGGLE}"
+
+                echo "Choice: ${params.CHOICE}"
+
+                echo "Password: ${params.PASSWORD}"
+            }
+        }
+    }
+}
+################################################################
+pipeline {
+    agent any
+    stages {
+        stage('Setup parameters') {
+            steps {
+                script { 
+                    properties([
+                        parameters([
+                            choice(
+                                choices: ['ONE', 'TWO'], 
+                                name: 'PARAMETER_01'
+                            ),
+                            booleanParam(
+                                defaultValue: true, 
+                                description: '', 
+                                name: 'BOOLEAN'
+                            ),
+                            text(
+                                defaultValue: '''
+                                this is a multi-line 
+                                string parameter example
+                                ''', 
+                                 name: 'MULTI-LINE-STRING'
+                            ),
+                            string(
+                                defaultValue: 'scriptcrunch', 
+                                name: 'STRING-PARAMETER', 
+                                trim: true
+                            )
+                        ])
+                    ])
+                }
+            }
+        }
+    }   
+}
+
+The parameters specified in the Jenkinsfile will appear in the job only after the first run. Your first job run will fail as you will not be able to provide the parameter value through the job.
+################################################################################################
+pipeline{
+    
+    tools{
+        jdk 'myjava'
+        maven 'mymaven'
+    }
+    agent none
+    stages{
+        stage('clone repo'){
+            agent any
+            steps{
+                git 'https://github.com/Sonal0409/DevOpsClassCodes.git'
+                }
+        }
+        stage('Compile'){
+            agent {label 'Linux_Slave'}
+            steps{
+              git 'https://github.com/Sonal0409/DevOpsClassCodes.git'
+              sh 'mvn compile'
+                }
+        }
+        stage('CodeReview'){
+             agent {label 'Linux_Slave'}
+            steps{
+              git 'https://github.com/Sonal0409/DevOpsClassCodes.git'
+              sh 'mvn pmd:pmd'
+                }
+        }
+        stage('Unit Test'){
+               agent {label 'win_slave'}
+            steps{
+                git 'https://github.com/Sonal0409/DevOpsClassCodes.git'
+              bat 'mvn test'
+                }
+        }
+     stage('CodeCoverage'){
+           agent {label 'win_slave'}
+            steps{
+          
+            bat 'mvn cobertura:cobertura -Dcobertura.format=xml'
+                }
+        }
+             stage('Packge'){
+                 agent {label 'Linux_Slave'}
+            steps{
+                
+              sh 'mvn package'
+                }
+        }
+    }
+}
+################################################################################
+
+# /etc/profile
+
+# System wide environment and startup programs, for login setup
+# Functions and aliases go in /etc/bashrc
+
+# It's NOT a good idea to change this file unless you know what you
+# are doing. It's much better to create a custom.sh shell script in
+# /etc/profile.d/ to make custom changes to your environment, as this
+# will prevent the need for merging in future updates.
+
+pathmunge () {
+    case ":${PATH}:" in
+        *:"$1":*)
+            ;;
+        *)
+            if [ "$2" = "after" ] ; then
+                PATH=$PATH:$1
+            else
+                PATH=$1:$PATH
+            fi
+    esac
+}
+
+
+if [ -x /usr/bin/id ]; then
+    if [ -z "$EUID" ]; then
+        # ksh workaround
+        EUID=`/usr/bin/id -u`
+        UID=`/usr/bin/id -ru`
+    fi
+    USER="`/usr/bin/id -un`"
+    LOGNAME=$USER
+    MAIL="/var/spool/mail/$USER"
+fi
+
+# Path manipulation
+if [ "$EUID" = "0" ]; then
+    pathmunge /usr/sbin
+    pathmunge /usr/local/sbin
+else
+    pathmunge /usr/local/sbin after
+    pathmunge /usr/sbin after
+fi
+
+HOSTNAME=`/usr/bin/hostname 2>/dev/null`
+HISTSIZE=1000
+if [ "$HISTCONTROL" = "ignorespace" ] ; then
+    export HISTCONTROL=ignoreboth
+else
+    export HISTCONTROL=ignoredups
+fi
+
+export PATH USER LOGNAME MAIL HOSTNAME HISTSIZE HISTCONTROL
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.282.b08-1.amzn2.0.1.x86_64
+export PATH=$JAVA_HOME/bin:$PATH
+export MAVEN_HOME=/usr/share/maven
+# By default, we want umask to get set. This sets it for login shell
+# Current threshold for system reserved uid/gids is 200
+# You could check uidgid reservation validity in
+# /usr/share/doc/setup-*/uidgid file
+if [ $UID -gt 199 ] && [ "`/usr/bin/id -gn`" = "`/usr/bin/id -un`" ]; then
+    umask 002
+else
+    umask 022
+fi
+
+for i in /etc/profile.d/*.sh /etc/profile.d/sh.local ; do
+    if [ -r "$i" ]; then
+        if [ "${-#*i}" != "$-" ]; then 
+            . "$i"
+        else
+            . "$i" >/dev/null
+        fi
+    fi
+done
+
+unset i
+unset -f pathmunge
+##########################################################################
+Source code for WebCalculator app is at
+
+https://github.com/Sonal0409/JavaWebCalculator.git
+
+
+Create 2 new ec2-instance and name them as QAServer & prodServer.
+
+Go to Jenkins Master (name: GIT30MAR)
+
+Connect master to QAServer
+Connect master to prodServer
+
+Follow the below steps:
+
+LINUX SLAVE
+*************************
+create root directory
+
+cd /tmp
+mkdir jenkisndir
+
+give permission to the directory
+
+sudo chmod -R 777 /tmp/jenkinsdir
+
+Go to master
+*************
+
+Go to node
+
+give following informtion under Launch Method
+
+how to connect to master- select ssh
+
+host: private ip
+
+provide credentials
+
+also set 
+Host key verfication as:
+Non verifying Verification startegy
+
+Save it.
+
+***************************
+
+Create a new pipeline job : QApipelineJob
+
+Write the following pipeline as code and give Agent label as qa_Server
+
+pipeline{
+    
+     tools{
+        jdk 'myjava'
+        maven 'mymaven'
+    }
+    agent {label 'qa_Server'}
+    stages{
+        stage('checkout'){
+            steps{
+               git branch: 'qa', url: 'https://github.com/sonal04devops/JavaWebCalculator.git'
+            }
+        }
+         stage('Compile'){
+              
+              steps{
+                  echo 'compiling..'
+                  sh 'mvn compile'
+	      }
+          }
+          stage('UnitTest'){
+               
+              steps{
+                  sh 'mvn test'
+              }
+               post {
+               success {
+                   junit 'target/surefire-reports/*.xml'
+               }
+           }	
+          }
+          stage('Package'){
+        
+              steps{
+                  sh 'mvn package'
+              }
+          }
+          
+}
+}
+
+Save the job and Build the job
+*************************************************
+
+Create a new pipeline job : QApipelineJob
+
+Write the following pipeline as code and give Agent label as prod_Server
+
+pipeline{
+    
+     tools{
+        jdk 'myjava'
+        maven 'mymaven'
+    }
+    agent {label 'prod_server'}
+    stages{
+        stage('checkout'){
+            steps{
+               git 'https://github.com/sonal04devops/JavaWebCalculator.git'
+            }
+        }
+         stage('Compile'){
+              
+              steps{
+                  echo 'compiling..'
+                  sh 'mvn compile'
+	      }
+          }
+          stage('UnitTest'){
+               
+              steps{
+                  sh 'mvn test'
+              }
+               post {
+               success {
+                   junit 'target/surefire-reports/*.xml'
+               }
+           }	
+          }
+          stage('Package'){
+        
+              steps{
+                  sh 'mvn package'
+              }
+          }
+          
+}
+}
+
+******************************************************
+
+Otherwise you can create Jenkins files with pipeline code in respective branches (Master & QA) and then execute the Job in Jenkins.
+
+You can also connect QA and prod jobs to get executed one after the other. This will be automatic triggering of prodServer job.
+
+
+
+
+
+*******************************************
+
+Parameters
+In order to support the wide variety of use-cases Pipeline authors may have, the agent section supports a few different types of parameters. These parameters can be applied at the top-level of the pipeline block, or within each stage directive.
+
+any
+Execute the Pipeline, or stage, on any available agent. For example: agent any
+
+none
+When applied at the top-level of the pipeline block no global agent will be allocated for the entire Pipeline run and each stage section will need to contain its own agent section. For example: agent none
+
+label
+Execute the Pipeline, or stage, on an agent available in the Jenkins environment with the provided label. For example: agent { label 'my-defined-label' }
+
+Label conditions can also be used. For example: agent { label 'my-label1 && my-label2' } or agent { label 'my-label1 || my-label2' }
+
+node
+agent { node { label 'labelName' } } behaves the same as agent { label 'labelName' }, but node allows for additional options (such as customWorkspace).
+
+########################################################################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+Multiple Condition, Declarative Pipeline
+########################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+                environment name: 'DEPLOY_TO', value: 'production'
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+Nested condition (same behavior as previous example)
+###########################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                allOf {
+                    branch 'production'
+                    environment name: 'DEPLOY_TO', value: 'production'
+                }
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+Multiple condition and nested condition
+####################################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+                anyOf {
+                    environment name: 'DEPLOY_TO', value: 'production'
+                    environment name: 'DEPLOY_TO', value: 'staging'
+                }
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+triggeredBy
+########################
+
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                triggeredBy "TimerTrigger"
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+beforeOptions:
+########################
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                beforeOptions true
+                branch 'testing'
+            }
+            options {
+                lock label: 'testing-deploy-envs', quantity: 1, variable: 'deployEnv'
+            }
+            steps {
+                echo "Deploying to ${deployEnv}"
+            }
+        }
+    }
+}
+
+beforeInput
+#####################
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                beforeInput true
+                branch 'production'
+            }
+            input {
+                message "Deploy to production?"
+                id "simple-input"
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+Sequential Stages
+########################
+Stages in Declarative Pipeline may have a stages section containing a list of nested stages to be run in sequential order. Note that a stage must have one and only one of steps, stages, parallel, or matrix. It is not possible to nest a parallel or matrix block within a stage directive if that stage directive is nested within a parallel or matrix block itself. However, a stage directive within a parallel or matrix block can use all other functionality of a stage, including agent, tools, when, etc.
+
+ Sequential Stages, Declarative Pipeline
+pipeline {
+    agent none
+    stages {
+        stage('Non-Sequential Stage') {
+            agent {
+                label 'for-non-sequential'
+            }
+            steps {
+                echo "On Non-Sequential Stage"
+            }
+        }
+        stage('Sequential') {
+            agent {
+                label 'for-sequential'
+            }
+            environment {
+                FOR_SEQUENTIAL = "some-value"
+            }
+            stages {
+                stage('In Sequential 1') {
+                    steps {
+                        echo "In Sequential 1"
+                    }
+                }
+                stage('In Sequential 2') {
+                    steps {
+                        echo "In Sequential 2"
+                    }
+                }
+                stage('Parallel In Sequential') {
+                    parallel {
+                        stage('In Parallel 1') {
+                            steps {
+                                echo "In Parallel 1"
+                            }
+                        }
+                        stage('In Parallel 2') {
+                            steps {
+                                echo "In Parallel 2"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+Parallel
+Stages in Declarative Pipeline may have a parallel section containing a list of nested stages to be run in parallel. Note that a stage must have one and only one of steps, stages, parallel, or matrix. It is not possible to nest a parallel or matrix block within a stage directive if that stage directive is nested within a parallel or matrix block itself. However, a stage directive within a parallel or matrix block can use all other functionality of a stage, including agent, tools, when, etc.
+
+In addition, you can force your parallel stages to all be aborted when any one of them fails, by adding failFast true to the stage containing the parallel. Another option for adding failfast is adding an option to the pipeline definition: parallelsAlwaysFailFast()
+
+
+Parallel Stages, Declarative Pipeline
+##################
+pipeline {
+    agent any
+    stages {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            failFast true
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+parallelsAlwaysFailFast
+######################
+pipeline {
+    agent any
+    options {
+        parallelsAlwaysFailFast()
+    }
+    stages {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+Matrix
+Stages in Declarative Pipeline may have a matrix section defining a multi-dimensional matrix of name-value combinations to be run in parallel. We’ll refer these combinations as "cells" in a matrix. Each cell in a matrix can include one or more stages to be run sequentially using the configuration for that cell. Note that a stage must have one and only one of steps, stages, parallel, or matrix. It is not possible to nest a parallel or matrix block within a stage directive if that stage directive is nested within a parallel or matrix block itself. However, a stage directive within a parallel or matrix block can use all other functionality of a stage, including agent, tools, when, etc.
+
+In addition, you can force your matrix cells to all be aborted when any one of them fails, by adding failFast true to the stage containing the matrix. Another option for adding failfast is adding an option to the pipeline definition: parallelsAlwaysFailFast()
+
+The matrix section must include an axes section and a stages section. The axes section defines the values for each axis in the matrix. The stages section defines a list of stages to run sequentially in each cell. A matrix may have an excludes section to remove invalid cells from the matrix. Many of the directives available on stage, including agent, tools, when, etc., can also be added to matrix to control the behavior of each cell.
+
+axes
+The axes section specifies one or more axis directives. Each axis consists of a name and a list of values. All the values from each axis are combined with the others to produce the cells.
+
+One-axis with 3 cells
+############################
+matrix {
+    axes {
+        axis {
+            name 'PLATFORM'
+            values 'linux', 'mac', 'windows'
+        }
+    }
+    // ...
+}
+Two-axis with 12 cells (three by four)
+#####################
+matrix {
+    axes {
+        axis {
+            name 'PLATFORM'
+            values 'linux', 'mac', 'windows'
+        }
+        axis {
+            name 'BROWSER'
+            values 'chrome', 'edge', 'firefox', 'safari'
+        }
+    }
+    // ...
+}
+
+###############################################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+Multiple Condition, Declarative Pipeline
+########################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+                environment name: 'DEPLOY_TO', value: 'production'
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+Nested condition (same behavior as previous example)
+###########################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                allOf {
+                    branch 'production'
+                    environment name: 'DEPLOY_TO', value: 'production'
+                }
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+Multiple condition and nested condition
+####################################
+
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+                anyOf {
+                    environment name: 'DEPLOY_TO', value: 'production'
+                    environment name: 'DEPLOY_TO', value: 'staging'
+                }
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+triggeredBy
+########################
+
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                triggeredBy "TimerTrigger"
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+beforeOptions:
+########################
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                beforeOptions true
+                branch 'testing'
+            }
+            options {
+                lock label: 'testing-deploy-envs', quantity: 1, variable: 'deployEnv'
+            }
+            steps {
+                echo "Deploying to ${deployEnv}"
+            }
+        }
+    }
+}
+
+beforeInput
+#####################
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                beforeInput true
+                branch 'production'
+            }
+            input {
+                message "Deploy to production?"
+                id "simple-input"
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+
+Sequential Stages
+########################
+Stages in Declarative Pipeline may have a stages section containing a list of nested stages to be run in sequential order. Note that a stage must have one and only one of steps, stages, parallel, or matrix. It is not possible to nest a parallel or matrix block within a stage directive if that stage directive is nested within a parallel or matrix block itself. However, a stage directive within a parallel or matrix block can use all other functionality of a stage, including agent, tools, when, etc.
+
+ Sequential Stages, Declarative Pipeline
+pipeline {
+    agent none
+    stages {
+        stage('Non-Sequential Stage') {
+            agent {
+                label 'for-non-sequential'
+            }
+            steps {
+                echo "On Non-Sequential Stage"
+            }
+        }
+        stage('Sequential') {
+            agent {
+                label 'for-sequential'
+            }
+            environment {
+                FOR_SEQUENTIAL = "some-value"
+            }
+            stages {
+                stage('In Sequential 1') {
+                    steps {
+                        echo "In Sequential 1"
+                    }
+                }
+                stage('In Sequential 2') {
+                    steps {
+                        echo "In Sequential 2"
+                    }
+                }
+                stage('Parallel In Sequential') {
+                    parallel {
+                        stage('In Parallel 1') {
+                            steps {
+                                echo "In Parallel 1"
+                            }
+                        }
+                        stage('In Parallel 2') {
+                            steps {
+                                echo "In Parallel 2"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+Parallel
+Stages in Declarative Pipeline may have a parallel section containing a list of nested stages to be run in parallel. Note that a stage must have one and only one of steps, stages, parallel, or matrix. It is not possible to nest a parallel or matrix block within a stage directive if that stage directive is nested within a parallel or matrix block itself. However, a stage directive within a parallel or matrix block can use all other functionality of a stage, including agent, tools, when, etc.
+
+In addition, you can force your parallel stages to all be aborted when any one of them fails, by adding failFast true to the stage containing the parallel. Another option for adding failfast is adding an option to the pipeline definition: parallelsAlwaysFailFast()
+
+
+Parallel Stages, Declarative Pipeline
+##################
+pipeline {
+    agent any
+    stages {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            failFast true
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+parallelsAlwaysFailFast
+######################
+pipeline {
+    agent any
+    options {
+        parallelsAlwaysFailFast()
+    }
+    stages {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+Matrix
+Stages in Declarative Pipeline may have a matrix section defining a multi-dimensional matrix of name-value combinations to be run in parallel. We’ll refer these combinations as "cells" in a matrix. Each cell in a matrix can include one or more stages to be run sequentially using the configuration for that cell. Note that a stage must have one and only one of steps, stages, parallel, or matrix. It is not possible to nest a parallel or matrix block within a stage directive if that stage directive is nested within a parallel or matrix block itself. However, a stage directive within a parallel or matrix block can use all other functionality of a stage, including agent, tools, when, etc.
+
+In addition, you can force your matrix cells to all be aborted when any one of them fails, by adding failFast true to the stage containing the matrix. Another option for adding failfast is adding an option to the pipeline definition: parallelsAlwaysFailFast()
+
+The matrix section must include an axes section and a stages section. The axes section defines the values for each axis in the matrix. The stages section defines a list of stages to run sequentially in each cell. A matrix may have an excludes section to remove invalid cells from the matrix. Many of the directives available on stage, including agent, tools, when, etc., can also be added to matrix to control the behavior of each cell.
+
+axes
+The axes section specifies one or more axis directives. Each axis consists of a name and a list of values. All the values from each axis are combined with the others to produce the cells.
+
+One-axis with 3 cells
+############################
+matrix {
+    axes {
+        axis {
+            name 'PLATFORM'
+            values 'linux', 'mac', 'windows'
+        }
+    }
+    // ...
+}
+Two-axis with 12 cells (three by four)
+#####################
+matrix {
+    axes {
+        axis {
+            name 'PLATFORM'
+            values 'linux', 'mac', 'windows'
+        }
+        axis {
+            name 'BROWSER'
+            values 'chrome', 'edge', 'firefox', 'safari'
+        }
+    }
+    // ...
+}
+
+#####################################################
+
+Running pipeline stages in parallel:
+**********************************************
+
+pipeline {
+    agent any
+    stages {
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            failFast false
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+            }
+        }
+    }
+}
+
+**************************************
+
+pipeline {
+    agent any
+    stages {
+        stage('1') {
+            steps {
+                sh 'exit 0'
+            }
+        }
+        stage('2') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh "exit 1"
+                }
+            }
+        }
+        stage('3') {
+            steps {
+                sh 'exit 0'
+            }
+        }
+    }
+}
+In the example above, all stages will execute, the pipeline will be successful, but stage 2 will show as failed:
+
+########################################################
+
+Triggers, Declarative Pipeline
+// Declarative //
+pipeline {
+    agent any
+    triggers {
+        cron('H */4 * * 1-5')
+    }
+    stages {
+        stage('Example') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
+###########################################################
+Here is an example of a stage that will be executed based on the condition that we get from the choice parameter.
+
+The parameter name is ENVIRONMENT, and we access it in the stage as params.ENVIRONMENT. 
+So when the choice parameter matches PROD, it will execute the steps mentioned in the stage.
+
+stage('Deploy to Production') {
+            when {
+                expression { 
+                   return params.ENVIRONMENT == 'PROD'
+                }
+            }
+            steps {
+                    sh """
+                    echo "deploy to production"
+                    """
+                }
+            }
+   }
