@@ -8,7 +8,54 @@ Docker Notes:
 Start docker
 
 # systemctl start docker
+# docker system prune --all/ -a [cleaning all images] cmd in docker to cleanup docker host, remove all the dangling image
+[root@ip-172-31-37-159 overlay2]# docker system prune -a
+WARNING! This will remove:
+  - all stopped containers
+  - all networks not used by at least one container
+  - all images without at least one container associated to them
+  - all build cache
 
+
+# docker images [listing of all images]
+
+https://hub.docker.com/ [docker hub]
+
+*pull image from docker hub to docker host
+docker pull imagename
+docker pull ubuntu [download latest version]
+docker pull ubuntu:18.0 [specific version]
+
+[locationn of images stored]
+[root@ip-172-31-37-159 overlay2]# pwd
+cd /var/lib/docker/overlay2
+
+[delete particular images-dangling image](which image is not associated with container is called dangling image)
+docker rmi ubuntu
+docker rmi  -f
+Hostname DockerHost
+sudo su -
+docker ps -a [it will show all process]
+docker run ubuntu
+docker run -it --name cont1 ubuntu
+
+apt-get update
+apt-get install git -y
+
+comeout from container and container keep it running
+
+ctrl pq
+comeout from container and container will stop
+exit
+
+we can restart container only if we attached with foreground or dettache mode
+
+i want to go again in container
+docker attach cont1
+-> how can we check all the process running in a container
+docker container top contid
+-> from the docker hostmachine to check the statistic of container ram, 
+docker container stats contid
 
 ### INSTALL DOCKER 
 
@@ -17,13 +64,10 @@ sudo apt-get install -y apt-transport-https ca-certificates curl software-proper
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt-get update ; clear
+sudo apt-get update ; 
 sudo apt-get install -y docker-ce
 
 service docker start
-
-
-
 *******************************
 
 Docker HUb -> registry where docker free images are available, you can also store images in Docker hub
@@ -40,9 +84,7 @@ DTR - Docker trusted registry
 
 Private registry on your local machine on port 5000
 
-
 Lets check docker hub and see how bases images are:
-
 
 Docker Images:
 *****************
@@ -58,15 +100,11 @@ How will docker know form where to pull the image and which tag to pull??
 
 Every images carries its address with it
 
-
 The image name includes
 
  registryname/reponame/imagename:tagname
-  
-
 
  when i say just ubuntu : docker will assume by default
-
 
   dockerhub/library/ubuntu:latest
 
@@ -83,8 +121,6 @@ Private registry which on a server (12.34.56.78) and port number 5000
  imagenmae will look like this:
 
   12.34.56.78:5000/sonal/myimage:tag1
-
-
 
 Images Command:
 
@@ -119,7 +155,7 @@ Run options to start the container:
 We have to provide any one the options to start the container, otherwise the contaienr will always be in exited
 
 
-> Forground mode (-it)
+> Forground mode (-it)interactive terminal - inside the container
 
 This mode is used for images of type OS images
 
@@ -155,15 +191,11 @@ How can we attach to the terminal of the OS container again:
 
 This command works only if a container is up & running
 
-
-
 > detached Mode (-d)
-
 
 If your image is of type web, we will use detached mode
 
 # docker run -d --name cont1 nginx
-
 
 In this case:
 
@@ -171,7 +203,6 @@ In this case:
 > Contaienr status will be UP
 > and you will not logged on the container process
 > user will not be attached to the terminal of the container
-
 
 Agenda:
 *********************
