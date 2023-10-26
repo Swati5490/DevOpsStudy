@@ -32,7 +32,7 @@ cd /var/lib/docker/overlay2
 
 [delete particular images-dangling image](which image is not associated with container is called dangling image)
 docker rmi ubuntu
-docker rmi  -f
+docker rm -f contid
 Hostname DockerHost
 sudo su -
 docker ps -a [it will show all process]
@@ -57,6 +57,7 @@ docker container top contid
 -> from the docker hostmachine to check the statistic of container ram, 
 docker container stats contid
 
+docker rm -f $(ps -aq) it will remove all the container
 ### INSTALL DOCKER 
 
 sudo apt-get update
@@ -193,7 +194,7 @@ This command works only if a container is up & running
 
 > detached Mode (-d)
 
-If your image is of type web, we will use detached mode
+If your image is of type web, we will use detached mode (web server like ngnix, db server )
 
 # docker run -d --name cont1 nginx
 
@@ -204,10 +205,17 @@ In this case:
 > and you will not logged on the container process
 > user will not be attached to the terminal of the container
 
+access the container from docker host
+on the docker host, execute the cmd and attach to the terminal of the nginx container
+-> docker exec -it n1 bash
+   (docker exec -it [container name] [command])
+
+access the container fromthe browser pf local machine-outside the docker host
+
 Agenda:
 *********************
 
-> port Mapping
+> port Mapping (port forwarding)
 
 1. This scenario is applicable only to web based Images
 
