@@ -256,17 +256,7 @@ All build will be generated automatically every 2 mins
 
 Build Triggers--> Poll SCM --> * * * * *
 
-
-
-
-
-
-
-
-
 Build will be generated each time there is a chnage in the repository only.
-
-
 
 Webhook:
 Webhooks allow Jenkins to be notified when certain events happen on the repo. When the specified events happen, we’ll send a POST request to each of the URLs you provide.
@@ -302,7 +292,6 @@ click on add webhook.
 
 now make some changes in repo,
 go to jenkins--> you will see a new build has been created
-
 
 Agenda Day3:
 ****************
@@ -344,7 +333,6 @@ POM.xml
 
 > dependencies ==> information about s/w that are used by developer to write the code
 > Build plugins ==> name and version of vaious plugins in order to perform build steps
-
 
 Jenkins--> Manage Jenkins-->Global Tool configuration
 
@@ -602,12 +590,9 @@ Search for build pipeline plugin
 
 Click on the checkbox and click on Install without restart
 
-
 Plugin will be installed.
 
 Lets build the pipeline:
-
-
 
 *****************
 
@@ -619,9 +604,7 @@ Pipeline as a code
 **************************
 Lets create a pipeline using code:
 
-
 Create a new job ==> select project as pipeline
-
 
 pipeline{
     
@@ -860,12 +843,6 @@ git :  /usr/bin/git
 
 java: /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.332.b09-1.amzn2.0.2.x86_64
 
-
-
-
-
-
-
 ********************************************
 Windows:
 ************************************
@@ -1008,9 +985,6 @@ Select the credentials
 
 
 Host Key Verification Strategy : select the 4th option --> non verifying verification startegy
-
-
-
 
 Set up Windows Agent:
 
